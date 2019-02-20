@@ -1,7 +1,8 @@
 package it.taglio.gui;
 
-import static it.taglio.UDNConstants.root;
-import static it.taglio.UDNConstants.sep;
+import static it.taglio.Constants.icon;
+import static it.taglio.Constants.root;
+import static it.taglio.Constants.sep;
 
 import java.awt.AWTEvent;
 import java.awt.Component;
@@ -44,9 +45,9 @@ import javax.swing.tree.DefaultTreeModel;
 import it.taglio.types.FuncEntry;
 import it.taglio.types.FuncInfo;
 
+@SuppressWarnings("serial")
 public class UDNGui extends JFrame {
 
-	private static final long serialVersionUID = -4201760020834985949L;
 	private JTextField textField;
 	private JLabel lblFunctionNameTo;
 	private JLabel lblUndecoratedFunctionName;
@@ -69,10 +70,15 @@ public class UDNGui extends JFrame {
 		// Frame setup
 		// -------------
 
+		// TODO: CREDIT THE GRAPHICS AUTHOR IN THE ABOUT TAB!
+		// - Icons: App icon made by Situ Herrera @
+		// https://www.flaticon.com/authors/situ-herrera
+
 		setTitle("UnDName GUI");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(800, 600);
 		setLocationRelativeTo(null);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(icon)));
 
 		// --------------
 		// Layout setup
@@ -123,6 +129,7 @@ public class UDNGui extends JFrame {
 
 		((DefaultTreeModel) tree.getModel()).setRoot(null);
 		((DefaultTreeModel) tree.getModel()).nodeChanged(null);
+		tree.setCellRenderer(new DepTree());
 
 		// ---------------------
 		// Text initialization

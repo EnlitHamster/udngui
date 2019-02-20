@@ -1,5 +1,10 @@
 package it.taglio;
 
+import static it.taglio.Constants.dep_dir;
+import static it.taglio.Constants.deps;
+import static it.taglio.Constants.root;
+import static it.taglio.Constants.sep;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -9,9 +14,7 @@ import javax.swing.JOptionPane;
 
 import it.taglio.gui.UDNGui;
 
-import static it.taglio.UDNConstants.*;
-
-public class UDNMain {
+public class Main {
 
 	public static void main(String[] args) {
 		if (!System.getProperty("os.name").contains("Windows")) {
@@ -21,10 +24,9 @@ public class UDNMain {
 			System.exit(1);
 		}
 
-		if (!((new File(root.getPath() + sep + "undname.exe")).exists()))
+		if (!root.exists())
 			try {
-				if (!root.exists())
-					root.mkdirs();
+				root.mkdirs();
 			} catch (SecurityException se) {
 				JOptionPane.showMessageDialog(null,
 						"Couldn't create necessary directories. Try to launch as administrator.", "Error",
@@ -47,7 +49,7 @@ public class UDNMain {
 				}
 			}
 		}
-		
+
 		new UDNGui();
 	}
 
@@ -56,7 +58,7 @@ public class UDNMain {
 		OutputStream output = null;
 
 		try {
-			stream = UDNMain.class.getResourceAsStream("/res/" + file);
+			stream = Main.class.getResourceAsStream(dep_dir + file);
 			if (stream == null)
 				throw new Exception("Cannot get resources from jar file");
 
