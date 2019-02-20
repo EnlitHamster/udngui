@@ -1,0 +1,355 @@
+package it.taglio.gui;
+
+import static it.taglio.UDNConstants.root;
+import static it.taglio.UDNConstants.sep;
+
+import java.awt.AWTEvent;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.event.AWTEventListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
+import javax.swing.JTree;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
+public class UDNGui extends JFrame {
+
+	private static final long serialVersionUID = -4201760020834985949L;
+	private JTextField textField;
+	private JLabel lblFunctionNameTo;
+	private JLabel lblUndecoratedFunctionName;
+	private JTextPane textPane;
+	private JButton btnUndecorate;
+	private JSplitPane splitPane;
+	private JFileChooser fileChooser;
+	private JScrollPane scrollPane;
+	private JTree tree;
+
+	public UDNGui() {
+
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e1) {
+		}
+
+		// -------------
+		// Frame setup
+		// -------------
+
+		setTitle("UnDName GUI");
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setSize(800, 600);
+		setLocationRelativeTo(null);
+
+		// --------------
+		// Layout setup
+		// --------------
+
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[] { 235, 541, 0 };
+		gridBagLayout.rowHeights = new int[] { 443, 20, 21, 23, 0 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+
+		// -----------------------
+		// Content instantiation
+		// -----------------------
+
+		splitPane = new JSplitPane();
+		fileChooser = new JFileChooser();
+		scrollPane = new JScrollPane();
+		tree = new JTree();
+		lblFunctionNameTo = new JLabel("Function name to undecorate");
+		textField = new JTextField();
+		lblUndecoratedFunctionName = new JLabel("Undecorated function name");
+		textPane = new JTextPane();
+		btnUndecorate = new JButton("Undecorate");
+
+		// ------------------
+		// Containers setup
+		// ------------------
+
+		splitPane.setLeftComponent(fileChooser);
+		scrollPane.setViewportView(tree);
+		splitPane.setRightComponent(scrollPane);
+
+		// --------------------
+		// File chooser setup
+		// --------------------
+
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setFileFilter(new FileNameExtensionFilter("Dinamic-link libraries", "dll"));
+		fileChooser.setAcceptAllFileFilterUsed(false);
+		fileChooser.setApproveButtonText("X");
+		disableButtons(fileChooser);
+		fileChooser.setApproveButtonText(null);
+
+		// ------------
+		// Tree setup
+		// ------------
+
+		((DefaultTreeModel) tree.getModel()).setRoot(null);
+		((DefaultTreeModel) tree.getModel()).nodeChanged(null);
+
+		// ---------------------
+		// Text initialization
+		// ---------------------
+
+		textField.setColumns(10);
+		textPane.setEditable(false);
+
+		String clipboard = "";
+
+		try {
+			clipboard = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+			File f = new File(Paths.get(clipboard).toString());
+			if (f.exists())
+				fileChooser.setSelectedFile(f);
+			else
+				textField.setText(clipboard);
+		} catch (InvalidPathException ipe) {
+			textField.setText(clipboard);
+		} catch (Exception e) {
+			textField.setText(clipboard);
+		}
+
+		// -------------------
+		// Constraints setup
+		// -------------------
+
+		// Split pane
+		GridBagConstraints gbc_splitPane = new GridBagConstraints();
+		gbc_splitPane.fill = GridBagConstraints.BOTH;
+		gbc_splitPane.insets = new Insets(5, 5, 5, 5);
+		gbc_splitPane.gridwidth = 2;
+		gbc_splitPane.gridx = 0;
+		gbc_splitPane.gridy = 0;
+
+		// Function name label
+		GridBagConstraints gbc_lblFunctionNameTo = new GridBagConstraints();
+		gbc_lblFunctionNameTo.fill = GridBagConstraints.BOTH;
+		gbc_lblFunctionNameTo.insets = new Insets(0, 5, 5, 5);
+		gbc_lblFunctionNameTo.gridx = 0;
+		gbc_lblFunctionNameTo.gridy = 1;
+
+		// Text field
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.anchor = GridBagConstraints.NORTH;
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.gridx = 1;
+		gbc_textField.gridy = 1;
+
+		// Result label
+		GridBagConstraints gbc_lblUndecoratedFunctionName = new GridBagConstraints();
+		gbc_lblUndecoratedFunctionName.fill = GridBagConstraints.BOTH;
+		gbc_lblUndecoratedFunctionName.insets = new Insets(0, 5, 5, 5);
+		gbc_lblUndecoratedFunctionName.gridx = 0;
+		gbc_lblUndecoratedFunctionName.gridy = 2;
+
+		// Result text
+		GridBagConstraints gbc_textPane = new GridBagConstraints();
+		gbc_textPane.anchor = GridBagConstraints.SOUTH;
+		gbc_textPane.fill = GridBagConstraints.HORIZONTAL;
+		gbc_textPane.insets = new Insets(0, 0, 5, 5);
+		gbc_textPane.gridx = 1;
+		gbc_textPane.gridy = 2;
+
+		// Button
+		GridBagConstraints gbc_btnUndecorate = new GridBagConstraints();
+		gbc_btnUndecorate.anchor = GridBagConstraints.NORTHEAST;
+		gbc_btnUndecorate.insets = new Insets(0, 0, 5, 5);
+		gbc_btnUndecorate.gridx = 1;
+		gbc_btnUndecorate.gridy = 3;
+
+		// ----------------------
+		// Listeners & Handlers
+		// ----------------------
+
+		Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
+
+			@Override
+			public void eventDispatched(AWTEvent event) {
+				if (event instanceof KeyEvent) {
+					if (((KeyEvent) event).getID() == KeyEvent.KEY_PRESSED
+							&& ((KeyEvent) event).getKeyCode() == KeyEvent.VK_ENTER)
+						undecorate();
+				}
+			}
+
+		}, AWTEvent.KEY_EVENT_MASK);
+
+		btnUndecorate.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent action) {
+				undecorate();
+			}
+		});
+
+		fileChooser.addPropertyChangeListener(new PropertyChangeListener() {
+			@Override
+			public void propertyChange(PropertyChangeEvent selection) {
+				if (selection.getNewValue() != null) {
+					String file = selection.getNewValue().toString();
+					if (file.lastIndexOf('.') != -1
+							&& (file.substring(file.lastIndexOf('.')).equalsIgnoreCase(".dll"))) {
+						String[] functions = listDLL(file);
+						DefaultMutableTreeNode top = new DefaultMutableTreeNode((new File(file).getName()));
+						createTree(top, functions);
+						DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+						model.setRoot(top);
+						model.nodeChanged(top);
+						tree.setSelectionPath(null);
+					}
+				}
+			}
+		});
+
+		tree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent selection) {
+				if (tree.getSelectionPath() != null && !tree.getLastSelectedPathComponent().toString()
+						.equals(((DefaultTreeModel) tree.getModel()).getRoot().toString()))
+					textField.setText(tree.getLastSelectedPathComponent().toString());
+			}
+		});
+
+		getRootPane().setDefaultButton(btnUndecorate);
+
+		// ---------------------------
+		// Building frame content...
+		// ---------------------------
+
+		getContentPane().setLayout(gridBagLayout);
+		getContentPane().add(splitPane, gbc_splitPane);
+		getContentPane().add(lblFunctionNameTo, gbc_lblFunctionNameTo);
+		getContentPane().add(textField, gbc_textField);
+		getContentPane().add(lblUndecoratedFunctionName, gbc_lblUndecoratedFunctionName);
+		getContentPane().add(textPane, gbc_textPane);
+		getContentPane().add(btnUndecorate, gbc_btnUndecorate);
+
+		// Initiate
+		setVisible(true);
+		btnUndecorate.requestFocus();
+	}
+
+	public void undecorate() {
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			String[] command = { root.getPath() + sep + "undname.exe", "?" + textField.getText() };
+			Process process = runtime.exec(command);
+
+			BufferedReader stdin = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String result = "", s;
+			while ((s = stdin.readLine()) != null)
+				result = result.concat(s);
+
+			textPane.setText(result.substring(result.indexOf("is :- ") + 6).trim().replaceAll("\"", ""));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public String[] listDLL(String dll) {
+		String header = "ordinal";
+		String footer = "Summary";
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			String[] command = { root.getPath() + sep + "dumpbin.exe", "/exports", dll };
+			Process process = runtime.exec(command);
+
+			BufferedReader stdin = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String result = "", s;
+			while ((s = stdin.readLine()) != null)
+				result = result.concat(s) + "\n";
+
+			result = result.substring(result.lastIndexOf(header), result.indexOf(footer)).trim();
+			result = result.replaceAll(" +", " ");
+
+			String[] lines = result.split("\n");
+			String[] functions = new String[lines.length - 2];
+
+			int nEntries = getEntriesNum(lines[0]);
+
+			for (int i = 0; i < lines.length - 2; ++i)
+				functions[i] = getFunction(lines[i + 2], nEntries);
+
+			return functions;
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, "Unable to open library.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+
+		return new String[0];
+	}
+
+	public static int getEntriesNum(String header) {
+		String columns = header.trim();
+		int count = 0;
+		do
+			++count;
+		while ((columns = columns.substring(columns.indexOf(" ") + 1)).indexOf(" ") != -1);
+		return count;
+	}
+
+	public static String getFunction(String line, int n) {
+		if (line.contains("[NONAME]"))
+			return "Unknown";
+
+		String f = line.trim();
+		for (int i = 0; i < n; ++i)
+			f = f.substring(f.indexOf(" ")).trim();
+		return f;
+	}
+
+	public static void disableButtons(Container c) {
+		for (Component comp : c.getComponents()) {
+			if (comp instanceof JButton && ((((JButton) comp).getIcon() != null
+					&& ((JButton) comp).getIcon().equals(UIManager.getIcon("FileChooser.newFolderIcon")))
+					|| (((JButton) comp).getText() != null && ((JButton) comp).getText()
+							.equalsIgnoreCase(UIManager.getString("FileChooser.cancelButtonText")))
+					|| (((JButton) comp).getText() != null && ((JButton) comp).getText().equalsIgnoreCase("X"))))
+				comp.setEnabled(false);
+			else if (comp instanceof Container)
+				disableButtons((Container) comp);
+		}
+
+		c.repaint();
+	}
+
+	public static void createTree(DefaultMutableTreeNode top, String[] content) {
+		for (String node : content)
+			top.add(new DefaultMutableTreeNode(node));
+	}
+}
