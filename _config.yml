@@ -1,5 +1,5 @@
 theme: jekyll-theme-minimal
-title: P compiler
-description: Compiler for a basic programming language (P) developped for my exam in Formal Languages and Translators @ DI UniTO 2018/2019
+title: UDN-GUI
+description: GUI for MS undname.exe utility
 show_downloads: true
 future: true
