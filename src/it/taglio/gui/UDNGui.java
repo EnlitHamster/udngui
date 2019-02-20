@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 
 import javax.swing.JButton;
@@ -41,6 +40,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+
+import it.taglio.types.FuncEntry;
+import it.taglio.types.FuncInfo;
 
 public class UDNGui extends JFrame {
 
@@ -137,11 +139,10 @@ public class UDNGui extends JFrame {
 			if (f.exists())
 				fileChooser.setSelectedFile(f);
 			else
-				textField.setText(clipboard);
-		} catch (InvalidPathException ipe) {
-			textField.setText(clipboard);
+				throw new Exception();
 		} catch (Exception e) {
 			textField.setText(clipboard);
+			undecorate();
 		}
 
 		// -------------------
@@ -224,7 +225,7 @@ public class UDNGui extends JFrame {
 					String file = selection.getNewValue().toString();
 					if (file.lastIndexOf('.') != -1
 							&& (file.substring(file.lastIndexOf('.')).equalsIgnoreCase(".dll"))) {
-						String[] functions = listDLL(file);
+						FuncInfo[] functions = listDLL(file);
 						DefaultMutableTreeNode top = new DefaultMutableTreeNode((new File(file).getName()));
 						createTree(top, functions);
 						DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -239,9 +240,14 @@ public class UDNGui extends JFrame {
 		tree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
 			public void valueChanged(TreeSelectionEvent selection) {
-				if (tree.getSelectionPath() != null && !tree.getLastSelectedPathComponent().toString()
-						.equals(((DefaultTreeModel) tree.getModel()).getRoot().toString()))
+
+				if (tree.getLastSelectedPathComponent() != null
+						&& ((DefaultMutableTreeNode) tree.getLastSelectedPathComponent()).getUserObject() != null
+						&& ((DefaultMutableTreeNode) tree.getLastSelectedPathComponent())
+								.getUserObject() instanceof FuncInfo) {
 					textField.setText(tree.getLastSelectedPathComponent().toString());
+					undecorate();
+				}
 			}
 		});
 
@@ -281,7 +287,7 @@ public class UDNGui extends JFrame {
 		}
 	}
 
-	public String[] listDLL(String dll) {
+	public FuncInfo[] listDLL(String dll) {
 		String header = "ordinal";
 		String footer = "Summary";
 		try {
@@ -298,7 +304,7 @@ public class UDNGui extends JFrame {
 			result = result.replaceAll(" +", " ");
 
 			String[] lines = result.split("\n");
-			String[] functions = new String[lines.length - 2];
+			FuncInfo[] functions = new FuncInfo[lines.length - 2];
 
 			int nEntries = getEntriesNum(lines[0]);
 
@@ -310,7 +316,7 @@ public class UDNGui extends JFrame {
 			JOptionPane.showMessageDialog(null, "Unable to open library.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 
-		return new String[0];
+		return new FuncInfo[0];
 	}
 
 	public static int getEntriesNum(String header) {
@@ -322,14 +328,22 @@ public class UDNGui extends JFrame {
 		return count;
 	}
 
-	public static String getFunction(String line, int n) {
-		if (line.contains("[NONAME]"))
-			return "Unknown";
-
+	public static FuncInfo getFunction(String line, int n) {
 		String f = line.trim();
-		for (int i = 0; i < n; ++i)
-			f = f.substring(f.indexOf(" ")).trim();
-		return f;
+		String[] info = f.split(" ");
+
+		if (f.contains("[NONAME]"))
+			return new FuncInfo(Integer.parseInt(info[0]), -1, "Unknown", Integer.parseInt(info[1], 16));
+		else if (info.length > 3) {
+			String name = info[3];
+			for (int i = 4; i < info.length; ++i) {
+				name = name.concat(" " + info[i]);
+			}
+			return new FuncInfo(Short.parseShort(info[0]), Short.parseShort(info[1], 16), name,
+					Integer.parseInt(info[2], 16));
+		} else
+			return new FuncInfo(0, 0, f, 0);
+
 	}
 
 	public static void disableButtons(Container c) {
@@ -347,8 +361,13 @@ public class UDNGui extends JFrame {
 		c.repaint();
 	}
 
-	public static void createTree(DefaultMutableTreeNode top, String[] content) {
-		for (String node : content)
-			top.add(new DefaultMutableTreeNode(node));
+	public static void createTree(DefaultMutableTreeNode top, FuncInfo[] content) {
+		for (FuncInfo fInfo : content) {
+			DefaultMutableTreeNode node = new DefaultMutableTreeNode(fInfo);
+			node.add(new DefaultMutableTreeNode(new FuncEntry("Ordinal", fInfo.ordinal)));
+			node.add(new DefaultMutableTreeNode(new FuncEntry("Hint", fInfo.hint, (byte) 4)));
+			node.add(new DefaultMutableTreeNode(new FuncEntry("Entry point", fInfo.entry_point, (byte) 8)));
+			top.add(node);
+		}
 	}
 }
