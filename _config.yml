@@ -1,0 +1,5 @@
+theme: jekyll-theme-minimal
+title: UDN-GUI
+description: GUI for MS undname.exe utility
+show_downloads: true
+future: true
