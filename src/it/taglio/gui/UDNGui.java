@@ -4,7 +4,6 @@ import static it.taglio.Constants.icon;
 import static it.taglio.Constants.root;
 import static it.taglio.Constants.sep;
 
-import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
@@ -19,11 +18,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -36,9 +42,11 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import it.taglio.Main;
 import it.taglio.listeners.AppListner;
 import it.taglio.listeners.FileChooserListener;
 import it.taglio.listeners.TreeListener;
+import it.taglio.listeners.UndecorListener;
 import it.taglio.types.FuncEntry;
 import it.taglio.types.FuncInfo;
 
@@ -54,6 +62,12 @@ public class UDNGui extends JFrame {
 	private JFileChooser fileChooser;
 	private JScrollPane scrollPane;
 	private JTree tree;
+	private JMenuBar menuBar;
+	private JMenu mnFile;
+	private JMenu mnOptions;
+	private JMenu menu;
+	private JMenuItem mntmAbout;
+	private JMenu mnRecentlyOpened;
 
 	public UDNGui() {
 
@@ -62,6 +76,8 @@ public class UDNGui extends JFrame {
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
 				| UnsupportedLookAndFeelException e1) {
 		}
+
+		JComponent.setDefaultLocale(Locale.ENGLISH);
 
 		// -----------
 		// Frame setup
@@ -76,6 +92,7 @@ public class UDNGui extends JFrame {
 		setSize(800, 600);
 		setLocationRelativeTo(null);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(icon)));
+		setLocale(Locale.ENGLISH);
 
 		// ------------
 		// Layout setup
@@ -91,6 +108,13 @@ public class UDNGui extends JFrame {
 		// Content instantiation
 		// ---------------------
 
+		menuBar = new JMenuBar();
+		mnFile = new JMenu("File");
+		mnRecentlyOpened = new JMenu("Recently opened");
+		mnOptions = new JMenu("Options");
+		menu = new JMenu("?");
+		mntmAbout = new JMenuItem("About");
+
 		splitPane = new JSplitPane();
 		fileChooser = new JFileChooser();
 		scrollPane = new JScrollPane();
@@ -100,6 +124,18 @@ public class UDNGui extends JFrame {
 		lblUndecoratedFunctionName = new JLabel("Undecorated function name");
 		textPane = new JTextPane();
 		btnUndecorate = new JButton("Undecorate");
+
+		// --------------
+		// Menu bar setup
+		// --------------
+
+		mnFile.add(mnRecentlyOpened);
+		menu.add(mntmAbout);
+		menuBar.add(mnFile);
+		menuBar.add(mnOptions);
+		menuBar.add(menu);
+
+		updateRecent(null);
 
 		// ----------------
 		// Containers setup
@@ -116,9 +152,6 @@ public class UDNGui extends JFrame {
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		fileChooser.setFileFilter(new FileNameExtensionFilter("Dinamic-link libraries", "dll"));
 		fileChooser.setAcceptAllFileFilterUsed(false);
-		fileChooser.setApproveButtonText("X");
-		disableButtons(fileChooser);
-		fileChooser.setApproveButtonText(null);
 
 		// ----------
 		// Tree setup
@@ -140,9 +173,10 @@ public class UDNGui extends JFrame {
 		try {
 			clipboard = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
 			File f = new File(Paths.get(clipboard).toString());
-			if (f.exists())
+			if (f.exists()) {
 				setDLL(f);
-			else
+				updateTree(f.getPath());
+			} else
 				throw new Exception();
 		} catch (Exception e) {
 			textField.setText(clipboard);
@@ -201,16 +235,22 @@ public class UDNGui extends JFrame {
 		// Listeners & Handlers
 		// --------------------
 
-		AppListner drop = new AppListner(this);
-		Toolkit.getDefaultToolkit().addAWTEventListener(drop, AWTEvent.KEY_EVENT_MASK);
+		AppListner lApp = new AppListner(this);
+		FileChooserListener lChooser = new FileChooserListener(this);
+		TreeListener lTree = new TreeListener(this);
+		UndecorListener lBtn = new UndecorListener(this);
 
-		fileChooser.addPropertyChangeListener(new FileChooserListener(this));
-		tree.addTreeSelectionListener(new TreeListener(this));
+		addWindowListener(lApp);
+		fileChooser.addPropertyChangeListener(lChooser);
+		fileChooser.addActionListener(lChooser);
+		tree.addTreeSelectionListener(lTree);
+		btnUndecorate.addActionListener(lBtn);
 
 		// -------------------------
 		// Building frame content...
 		// -------------------------
 
+		setJMenuBar(menuBar);
 		getContentPane().setLayout(gridBagLayout);
 		getContentPane().add(splitPane, gbc_splitPane);
 		getContentPane().add(lblFunctionNameTo, gbc_lblFunctionNameTo);
@@ -218,12 +258,15 @@ public class UDNGui extends JFrame {
 		getContentPane().add(lblUndecoratedFunctionName, gbc_lblUndecoratedFunctionName);
 		getContentPane().add(textPane, gbc_textPane);
 		getContentPane().add(btnUndecorate, gbc_btnUndecorate);
+		
+		fileChooser.getRootPane().setDefaultButton(btnUndecorate);
+		getRootPane().setDefaultButton(btnUndecorate);
 
 		// ---------------------
 		// Drag and Drop handler
 		// ---------------------
 
-		setDrop(this, drop);
+		setDrop(this, lApp);
 
 		// Initiate
 		setVisible(true);
@@ -231,6 +274,7 @@ public class UDNGui extends JFrame {
 	}
 
 	public void setDLL(File f) {
+		updateRecent(f);
 		fileChooser.setSelectedFile(f);
 	}
 
@@ -239,9 +283,14 @@ public class UDNGui extends JFrame {
 	}
 
 	public void updateTree(String file) {
-		FuncInfo[] functions = listDLL(file);
-		DefaultMutableTreeNode top = new DefaultMutableTreeNode((new File(file).getName()));
-		createTree(top, functions);
+		DefaultMutableTreeNode top = null;
+
+		if (file != null) {
+			FuncInfo[] functions = listDLL(file);
+			top = new DefaultMutableTreeNode((new File(file).getName()));
+			createTree(top, functions);
+		}
+
 		DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 		model.setRoot(top);
 		model.nodeChanged(top);
@@ -251,6 +300,28 @@ public class UDNGui extends JFrame {
 	public void undecorate(String value) {
 		textField.setText(value);
 		undecorate();
+	}
+
+	public void updateRecent(File file) {		
+		if (file != null)
+			Main.updateRecent(file);
+
+		if (Main.getRecent() != null) {
+			List<String> recent = new ArrayList<String>();
+
+			Main.getRecent().forEachRemaining(item -> {
+				if (!recent.contains(item.getAbsolutePath())) {
+					recent.add(item.getAbsolutePath());
+				}
+			});
+			
+			mnRecentlyOpened.removeAll();
+
+			recent.forEach(entry -> {
+				FileMenuItem item = new FileMenuItem(this, new File(entry));
+				mnRecentlyOpened.add(item);
+			});
+		}
 	}
 
 	public void undecorate() {
@@ -282,6 +353,9 @@ public class UDNGui extends JFrame {
 			String result = "", s;
 			while ((s = stdin.readLine()) != null)
 				result = result.concat(s) + "\n";
+			
+			if (!result.contains(header))
+				return new FuncInfo[0];
 
 			if (result.contains("fatal error"))
 				throw new Exception();
@@ -299,6 +373,7 @@ public class UDNGui extends JFrame {
 
 			return functions;
 		} catch (Exception e) {
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Unable to open library.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 
@@ -330,21 +405,6 @@ public class UDNGui extends JFrame {
 		} else
 			return new FuncInfo(0, 0, f, 0);
 
-	}
-
-	private static void disableButtons(Container c) {
-		for (Component comp : c.getComponents()) {
-			if (comp instanceof JButton && ((((JButton) comp).getIcon() != null
-					&& ((JButton) comp).getIcon().equals(UIManager.getIcon("FileChooser.newFolderIcon")))
-					|| (((JButton) comp).getText() != null && ((JButton) comp).getText()
-							.equalsIgnoreCase(UIManager.getString("FileChooser.cancelButtonText")))
-					|| (((JButton) comp).getText() != null && ((JButton) comp).getText().equalsIgnoreCase("X"))))
-				comp.setEnabled(false);
-			else if (comp instanceof Container)
-				disableButtons((Container) comp);
-		}
-
-		c.repaint();
 	}
 
 	private static void createTree(DefaultMutableTreeNode top, FuncInfo[] content) {

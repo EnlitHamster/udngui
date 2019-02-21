@@ -1,7 +1,9 @@
 package it.taglio;
 
+import static it.taglio.Constants.cache;
 import static it.taglio.Constants.dep_dir;
 import static it.taglio.Constants.deps;
+import static it.taglio.Constants.recent_size;
 import static it.taglio.Constants.root;
 import static it.taglio.Constants.sep;
 import static it.taglio.Constants.v;
@@ -17,6 +19,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
 
@@ -25,6 +29,8 @@ import it.taglio.gui.UDNGui;
 public class Main {
 
 	private static final String version = "0.3-alpha-01u";
+
+	private static LinkedList<File> recent;
 
 	public static void main(String[] args) {
 		if (!System.getProperty("os.name").contains("Windows")) {
@@ -64,18 +70,67 @@ public class Main {
 			}
 		}
 
+		recent = loadRecent();
 		new UDNGui();
 	}
 
+	public static Iterator<File> getRecent() {
+		if (recent == null)
+			return null;
+		return recent.descendingIterator();
+	}
+
+	public static void updateRecent(File file) {
+		if (recent == null)
+			recent = new LinkedList<File>();
+
+		if (file.exists()) {
+			if (recent.contains(file))
+				recent.remove(file);
+
+			recent.add(file);
+			if (recent.size() > recent_size)
+				recent.poll();
+		}
+	}
+
+	public static void saveRecent() {
+		if (recent == null)
+			return;
+
+		FileWriter writer = null;
+
+		try {
+			Runtime.getRuntime().exec("attrib -H " + cache).waitFor();
+
+			writer = new FileWriter(new File(cache));
+			File f = null;
+
+			while ((f = recent.poll()) != null)
+				writer.write(f.getAbsolutePath() + System.getProperty("line.separator"));
+
+			Runtime.getRuntime().exec("attrib +H " + cache);
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Unable to save recently opened DLLs", "Error",
+					JOptionPane.ERROR_MESSAGE);
+			clean((new File(cache)).toPath());
+		} finally {
+			try {
+				writer.close();
+			} catch (Exception e) {
+			}
+		}
+	}
+
 	private static boolean valid() {
-		File versioning = new File(root.getPath() + sep + v);
-		if (!versioning.exists())
+		if (!(new File(v)).exists())
 			return false;
 
 		BufferedReader reader = null;
 
 		try {
-			reader = new BufferedReader(new FileReader(versioning));
+			reader = new BufferedReader(new FileReader(v));
 			return reader.readLine().equals(version);
 		} catch (Exception e) {
 			return false;
@@ -85,6 +140,35 @@ public class Main {
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, "Unable to properly read version!", "Error",
 						JOptionPane.ERROR_MESSAGE);
+				System.exit(1);
+			}
+		}
+	}
+
+	private static void validate() {
+		FileWriter writer = null;
+
+		try {
+			Runtime.getRuntime().exec("attrib -H " + v).waitFor();
+
+			writer = new FileWriter(new File(v));
+			writer.write(version);
+			writer.close();
+
+			Runtime.getRuntime().exec("attrib +H " + v);
+		} catch (Exception e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Unable to validate installation", "Error", JOptionPane.ERROR_MESSAGE);
+			clean(root.toPath());
+			System.exit(1);
+		} finally {
+			try {
+				writer.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(null, "Unable to validate installation", "Error",
+						JOptionPane.ERROR_MESSAGE);
+				clean(root.toPath());
 				System.exit(1);
 			}
 		}
@@ -130,30 +214,36 @@ public class Main {
 			System.exit(1);
 		}
 	}
-	
-	private static void validate() {
-		FileWriter writer = null;
-		
+
+	private static LinkedList<File> loadRecent() {
+		if (!(new File(cache)).exists())
+			return null;
+
+		LinkedList<File> list = new LinkedList<File>();
+		BufferedReader reader = null;
+
 		try {
-			File file = new File(root.getPath() + sep + v);
-			writer = new FileWriter(file);
-			writer.write(version);
-			writer.close();
+			reader = new BufferedReader(new FileReader(cache));
+			String line = null;
+
+			while ((line = reader.readLine()) != null) {
+				File file = new File(line);
+				if (file.exists())
+					list.add(file);
+			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(null, "Unable to validate installation", "Error",
+			JOptionPane.showMessageDialog(null, "Unable to save recently opened DLLs", "Error",
 					JOptionPane.ERROR_MESSAGE);
-			clean(root.toPath());
-			System.exit(1);
+			clean((new File(cache)).toPath());
+			list = null;
 		} finally {
 			try {
-				writer.close();
+				reader.close();
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "Unable to validate installation", "Error",
-						JOptionPane.ERROR_MESSAGE);
-				clean(root.toPath());
-				System.exit(1);
 			}
 		}
+
+		return list;
 	}
 
 }

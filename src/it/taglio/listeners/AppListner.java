@@ -1,6 +1,5 @@
 package it.taglio.listeners;
 
-import java.awt.AWTEvent;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
@@ -8,17 +7,18 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
-import java.awt.event.AWTEventListener;
-import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import it.taglio.Main;
 import it.taglio.gui.UDNGui;
 
-public class AppListner implements DropTargetListener, AWTEventListener {
+public class AppListner implements DropTargetListener, WindowListener {
 
 	private final UDNGui frame;
 
@@ -64,12 +64,33 @@ public class AppListner implements DropTargetListener, AWTEventListener {
 	}
 
 	@Override
-	public void eventDispatched(AWTEvent event) {
-		if (event instanceof KeyEvent) {
-			if (((KeyEvent) event).getID() == KeyEvent.KEY_PRESSED
-					&& ((KeyEvent) event).getKeyCode() == KeyEvent.VK_ENTER)
-				frame.undecorate();
-		}
+	public void windowActivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent event) {
+		if ( event.getID() == WindowEvent.WINDOW_CLOSING)
+			Main.saveRecent();
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
 	}
 
 }
