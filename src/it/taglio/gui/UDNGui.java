@@ -13,6 +13,8 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +45,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import it.taglio.Main;
+import it.taglio.gui.options.OptionsGui;
 import it.taglio.listeners.AppListner;
 import it.taglio.listeners.FileChooserListener;
 import it.taglio.listeners.TreeListener;
@@ -64,10 +67,10 @@ public class UDNGui extends JFrame {
 	private JTree tree;
 	private JMenuBar menuBar;
 	private JMenu mnFile;
-	private JMenu mnOptions;
-	private JMenu menu;
-	private JMenuItem mntmAbout;
 	private JMenu mnRecentlyOpened;
+	private JMenu mnOther;
+	private JMenuItem mntmOptions;
+	private JMenuItem mntmAbout;
 
 	public UDNGui() {
 
@@ -92,7 +95,6 @@ public class UDNGui extends JFrame {
 		setSize(800, 600);
 		setLocationRelativeTo(null);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(icon)));
-		setLocale(Locale.ENGLISH);
 
 		// ------------
 		// Layout setup
@@ -111,8 +113,8 @@ public class UDNGui extends JFrame {
 		menuBar = new JMenuBar();
 		mnFile = new JMenu("File");
 		mnRecentlyOpened = new JMenu("Recently opened");
-		mnOptions = new JMenu("Options");
-		menu = new JMenu("?");
+		mnOther = new JMenu("Other");
+		mntmOptions = new JMenuItem("Options");
 		mntmAbout = new JMenuItem("About");
 
 		splitPane = new JSplitPane();
@@ -130,10 +132,10 @@ public class UDNGui extends JFrame {
 		// --------------
 
 		mnFile.add(mnRecentlyOpened);
-		menu.add(mntmAbout);
+		mnOther.add(mntmAbout);
+		mnOther.add(mntmOptions);
 		menuBar.add(mnFile);
-		menuBar.add(mnOptions);
-		menuBar.add(menu);
+		menuBar.add(mnOther);
 
 		updateRecent(null);
 
@@ -246,6 +248,15 @@ public class UDNGui extends JFrame {
 		tree.addTreeSelectionListener(lTree);
 		btnUndecorate.addActionListener(lBtn);
 
+		mntmOptions.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new OptionsGui();
+			}
+
+		});
+
 		// -------------------------
 		// Building frame content...
 		// -------------------------
@@ -258,7 +269,7 @@ public class UDNGui extends JFrame {
 		getContentPane().add(lblUndecoratedFunctionName, gbc_lblUndecoratedFunctionName);
 		getContentPane().add(textPane, gbc_textPane);
 		getContentPane().add(btnUndecorate, gbc_btnUndecorate);
-		
+
 		fileChooser.getRootPane().setDefaultButton(btnUndecorate);
 		getRootPane().setDefaultButton(btnUndecorate);
 
@@ -297,12 +308,7 @@ public class UDNGui extends JFrame {
 		tree.setSelectionPath(null);
 	}
 
-	public void undecorate(String value) {
-		textField.setText(value);
-		undecorate();
-	}
-
-	public void updateRecent(File file) {		
+	public void updateRecent(File file) {
 		if (file != null)
 			Main.updateRecent(file);
 
@@ -314,7 +320,7 @@ public class UDNGui extends JFrame {
 					recent.add(item.getAbsolutePath());
 				}
 			});
-			
+
 			mnRecentlyOpened.removeAll();
 
 			recent.forEach(entry -> {
@@ -322,6 +328,11 @@ public class UDNGui extends JFrame {
 				mnRecentlyOpened.add(item);
 			});
 		}
+	}
+
+	public void undecorate(String value) {
+		textField.setText(value);
+		undecorate();
 	}
 
 	public void undecorate() {
@@ -353,7 +364,7 @@ public class UDNGui extends JFrame {
 			String result = "", s;
 			while ((s = stdin.readLine()) != null)
 				result = result.concat(s) + "\n";
-			
+
 			if (!result.contains(header))
 				return new FuncInfo[0];
 

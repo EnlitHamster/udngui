@@ -3,7 +3,7 @@ package it.taglio;
 import static it.taglio.Constants.cache;
 import static it.taglio.Constants.dep_dir;
 import static it.taglio.Constants.deps;
-import static it.taglio.Constants.recent_size;
+import static it.taglio.Constants.max_recent_size;
 import static it.taglio.Constants.root;
 import static it.taglio.Constants.sep;
 import static it.taglio.Constants.v;
@@ -89,7 +89,7 @@ public class Main {
 				recent.remove(file);
 
 			recent.add(file);
-			if (recent.size() > recent_size)
+			if (recent.size() > max_recent_size)
 				recent.poll();
 		}
 	}
