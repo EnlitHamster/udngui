@@ -18,7 +18,7 @@ import it.taglio.types.FuncEntry;
 import it.taglio.types.FuncInfo;
 
 @SuppressWarnings("serial")
-public class DepTreeRenderer extends DefaultTreeCellRenderer {
+public class DepTree extends DefaultTreeCellRenderer {
 
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf,
