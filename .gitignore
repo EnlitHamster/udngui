@@ -1,4 +1,4 @@
 bin/**/*
-udngui*.jar
+*.jar
 .classpath
 .project
