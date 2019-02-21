@@ -19,9 +19,9 @@ import javax.swing.JOptionPane;
 import it.taglio.gui.UDNGui;
 
 public class AppListner implements DropTargetListener, AWTEventListener {
-	
+
 	private final UDNGui frame;
-	
+
 	public AppListner(UDNGui frame) {
 		this.frame = frame;
 	}
@@ -44,12 +44,16 @@ public class AppListner implements DropTargetListener, AWTEventListener {
 		try {
 			drop.acceptDrop(DnDConstants.ACTION_COPY);
 			List<File> files = (List<File>) drop.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-			
+
 			int i = 0;
-			while (i < files.size() && !files.get(i).getName().substring(files.get(i).getName().lastIndexOf('.')).equalsIgnoreCase(".dll")) ++i;
-			
-			if (i < files.size()) frame.setDLL(files.get(i));
-			else JOptionPane.showMessageDialog(null, "No DLL file found.", "Failure", JOptionPane.WARNING_MESSAGE);
+			while (i < files.size() && !files.get(i).getName().substring(files.get(i).getName().lastIndexOf('.'))
+					.equalsIgnoreCase(".dll"))
+				++i;
+
+			if (i < files.size())
+				frame.setDLL(files.get(i));
+			else
+				JOptionPane.showMessageDialog(null, "No DLL file found.", "Failure", JOptionPane.WARNING_MESSAGE);
 		} catch (UnsupportedFlavorException | IOException e) {
 			JOptionPane.showMessageDialog(null, "Can't import the dragged file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
