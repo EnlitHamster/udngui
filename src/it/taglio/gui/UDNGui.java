@@ -13,8 +13,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -46,15 +44,21 @@ import javax.swing.tree.DefaultTreeModel;
 
 import it.taglio.Main;
 import it.taglio.gui.options.OptionsGui;
-import it.taglio.listeners.AppListner;
-import it.taglio.listeners.FileChooserListener;
-import it.taglio.listeners.TreeListener;
-import it.taglio.listeners.UndecorListener;
+import it.taglio.listeners.AppAdapter;
+import it.taglio.listeners.ExtendedEventMulticaster;
+import it.taglio.listeners.FileChooserAdapter;
+import it.taglio.listeners.OptionsUpdateEvent;
+import it.taglio.listeners.OptionsUpdateListener;
+import it.taglio.listeners.TreeAdapter;
+import it.taglio.listeners.UndecorAdapter;
 import it.taglio.types.FuncEntry;
 import it.taglio.types.FuncInfo;
 
-@SuppressWarnings("serial")
 public class UDNGui extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+
+	transient OptionsUpdateListener optionsUpdateListener;
 
 	private JTextField textField;
 	private JLabel lblFunctionNameTo;
@@ -69,7 +73,7 @@ public class UDNGui extends JFrame {
 	private JMenu mnFile;
 	private JMenu mnRecentlyOpened;
 	private JMenu mnOther;
-	private JMenuItem mntmOptions;
+	private GuiMenuItem<OptionsGui> mntmOptions;
 	private JMenuItem mntmAbout;
 
 	public UDNGui() {
@@ -114,7 +118,7 @@ public class UDNGui extends JFrame {
 		mnFile = new JMenu("File");
 		mnRecentlyOpened = new JMenu("Recently opened");
 		mnOther = new JMenu("Other");
-		mntmOptions = new JMenuItem("Options");
+		mntmOptions = new GuiMenuItem<OptionsGui>("Options", this, OptionsGui.class);
 		mntmAbout = new JMenuItem("About");
 
 		splitPane = new JSplitPane();
@@ -237,25 +241,16 @@ public class UDNGui extends JFrame {
 		// Listeners & Handlers
 		// --------------------
 
-		AppListner lApp = new AppListner(this);
-		FileChooserListener lChooser = new FileChooserListener(this);
-		TreeListener lTree = new TreeListener(this);
-		UndecorListener lBtn = new UndecorListener(this);
+		AppAdapter lApp = new AppAdapter(this);
+		FileChooserAdapter lChooser = new FileChooserAdapter(this);
+		TreeAdapter lTree = new TreeAdapter(this);
+		UndecorAdapter lBtn = new UndecorAdapter(this);
 
 		addWindowListener(lApp);
 		fileChooser.addPropertyChangeListener(lChooser);
 		fileChooser.addActionListener(lChooser);
 		tree.addTreeSelectionListener(lTree);
 		btnUndecorate.addActionListener(lBtn);
-
-		mntmOptions.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new OptionsGui();
-			}
-
-		});
 
 		// -------------------------
 		// Building frame content...
@@ -428,10 +423,26 @@ public class UDNGui extends JFrame {
 		}
 	}
 
-	private static void setDrop(Component comp, AppListner listener) {
+	private static void setDrop(Component comp, AppAdapter listener) {
 		new DropTarget(comp, DnDConstants.ACTION_COPY, listener, true);
 		if (comp instanceof Container)
 			for (Component c : ((Container) comp).getComponents())
 				setDrop(c, listener);
+	}
+
+	public synchronized void addOptionsUpdateListener(OptionsUpdateListener listener) {
+		if (listener != null) {
+			optionsUpdateListener = ExtendedEventMulticaster.add(optionsUpdateListener, listener);
+		}
+	}
+
+	public synchronized void removeOptionsUpdateListener(OptionsUpdateListener listener) {
+		if (listener != null) {
+			optionsUpdateListener = ExtendedEventMulticaster.remove(optionsUpdateListener, listener);
+		}
+	}
+
+	public void fireOptionsUpdate(OptionsUpdateEvent event) {
+		optionsUpdateListener.updateOptions(event);
 	}
 }

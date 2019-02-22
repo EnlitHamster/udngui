@@ -10,7 +10,6 @@ import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -20,18 +19,38 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.NumberFormatter;
 
-@SuppressWarnings("serial")
-public class OptionsGui extends JDialog {
+import it.taglio.gui.UDNDialog;
+import it.taglio.gui.UDNGui;
+import it.taglio.listeners.OptionsAdapter;
+
+public class OptionsGui extends UDNDialog {
 	
-	private JPanel panel;
+	private static final long serialVersionUID = 1L;
+
+	// Cache
+	private JPanel panelCache;
 	private JLabel lblNumberOfCached;
 	private JFormattedTextField textField;
 	private JButton btnClearCache;
-	private JCheckBox chckbxAdditionalFunctionInfo;
-	private JButton btnNewButton;
-	private JButton btnAccept;
 
-	public OptionsGui() {
+	// General
+	private JPanel panelGeneral;
+	private JCheckBox chckbxCheckClipboard;
+
+	// DLL
+	private JPanel panelDLL;
+	private JCheckBox chckbxAdditionalFunctionInfo;
+
+	// Save/Discard
+	private JButton btnCancel;
+	private JButton btnAccept;
+	
+	private OptionSet opts;
+
+	public OptionsGui(UDNGui frame) {
+		super(frame);
+
+		opts = OptionSet.read();
 		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -66,10 +85,22 @@ public class OptionsGui extends JDialog {
 		// ---------------------
 
 		// Cache panel
-		panel = new JPanel();
+		panelCache = new JPanel();
 		lblNumberOfCached = new JLabel("Number of cached files");
 		textField = new JFormattedTextField(formatter);
 		btnClearCache = new JButton("Clear cache");
+
+		// General panel
+		panelGeneral = new JPanel();
+		chckbxCheckClipboard = new JCheckBox("Use clipboard content");
+
+		// DLL panel
+		panelDLL = new JPanel();
+		chckbxAdditionalFunctionInfo = new JCheckBox("Additional function info");
+		
+		// Controls
+		btnAccept = new JButton("Apply & close");
+		btnCancel = new JButton("Cancel");
 
 		// -------------
 		// Layouts setup
@@ -79,72 +110,99 @@ public class OptionsGui extends JDialog {
 		getContentPane().setLayout(null);
 
 		// Panels
-		panel.setLayout(null);
+		panelCache.setLayout(null);
+		panelGeneral.setLayout(null);
+		panelDLL.setLayout(null);
 
 		// ----------------
 		// Boundaries setup
 		// ----------------
 
-		// Panels
-		panel.setBounds(10, 10, 424, 81);
+		// Main
+		panelCache.setBounds(10, 10, 424, 81);
+		panelGeneral.setBounds(10, 102, 207, 50);
+		panelDLL.setBounds(227, 102, 207, 50);
+		btnCancel.setBounds(334, 163, 100, 23);
+		btnAccept.setBounds(224, 163, 100, 23);
 
 		// Cache panel
 		lblNumberOfCached.setBounds(10, 16, 109, 20);
 		textField.setBounds(129, 16, 285, 20);
 		btnClearCache.setBounds(325, 47, 89, 23);
+		
+		// General panel
+		chckbxCheckClipboard.setBounds(10, 16, 187, 23);
+		
+		// DLL panel
+		chckbxAdditionalFunctionInfo.setBounds(10, 16, 187, 23);
 
 		// -------------
 		// Borders setup
 		// -------------
 
-		panel.setBorder(new TitledBorder(new LineBorder(new Color(128, 128, 128), 1, true), "Cache",
+		panelCache.setBorder(new TitledBorder(new LineBorder(new Color(128, 128, 128), 1, true), "Cache",
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(128, 128, 128)));
+
+		panelGeneral.setBorder(new TitledBorder(new LineBorder(new Color(128, 128, 128), 1, true), "General",
+				TitledBorder.LEADING, TitledBorder.TOP, null, Color.GRAY));
+
+		panelDLL.setBorder(new TitledBorder(new LineBorder(new Color(128, 128, 128), 1, true), "DLL explorer",
+				TitledBorder.TRAILING, TitledBorder.TOP, null, Color.GRAY));
+
+		// --------------------
+		// Listeners & Handlers
+		// --------------------
+
+		OptionsAdapter lOpt = new OptionsAdapter(frame, this, opts);
+
+		btnAccept.addActionListener(lOpt);
+		btnCancel.addActionListener(lOpt);
 
 		// ------
 		// Params
 		// ------
-		
+
 		textField.setColumns(10);
+		
+		textField.setText(opts.get(OptionSet.RUS));
+		chckbxAdditionalFunctionInfo.setSelected(Boolean.parseBoolean(opts.get(OptionSet.AFI)));
+		chckbxCheckClipboard.setSelected(Boolean.parseBoolean(opts.get(OptionSet.CCS)));
 
 		// -------------------------
 		// Building frame content...
 		// -------------------------
 
-		panel.add(lblNumberOfCached);
-		panel.add(textField);
-		panel.add(btnClearCache);
+		panelCache.add(lblNumberOfCached);
+		panelCache.add(textField);
+		panelCache.add(btnClearCache);
 
-		getContentPane().add(panel);
+		panelGeneral.add(chckbxCheckClipboard);
+
+		panelDLL.add(chckbxAdditionalFunctionInfo);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(new LineBorder(new Color(128, 128, 128), 1, true), "General", TitledBorder.LEADING, TitledBorder.TOP, null, Color.GRAY));
-		panel_1.setBounds(10, 102, 207, 50);
-		getContentPane().add(panel_1);
-		panel_1.setLayout(null);
-		
-		JCheckBox chckbxNewCheckBox = new JCheckBox("Use clipboard content");
-		chckbxNewCheckBox.setBounds(10, 16, 187, 23);
-		panel_1.add(chckbxNewCheckBox);
-		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new TitledBorder(new LineBorder(new Color(128, 128, 128), 1, true), "DLL explorer", TitledBorder.TRAILING, TitledBorder.TOP, null, Color.GRAY));
-		panel_2.setBounds(227, 102, 207, 50);
-		getContentPane().add(panel_2);
-		panel_2.setLayout(null);
-		
-		chckbxAdditionalFunctionInfo = new JCheckBox("Additional function info");
-		chckbxAdditionalFunctionInfo.setBounds(10, 16, 187, 23);
-		panel_2.add(chckbxAdditionalFunctionInfo);
-		
-		btnNewButton = new JButton("Cancel");
-		btnNewButton.setBounds(334, 163, 100, 23);
-		getContentPane().add(btnNewButton);
-		
-		btnAccept = new JButton("Apply & close");
-		btnAccept.setBounds(224, 163, 100, 23);
+		getContentPane().add(panelCache);
+		getContentPane().add(panelGeneral);
+		getContentPane().add(panelDLL);
+		getContentPane().add(btnCancel);
 		getContentPane().add(btnAccept);
 
 		// Initiate
 		setVisible(true);
+	}
+
+	public JButton getAccept() {
+		return btnAccept;
+	}
+	
+	public JCheckBox getCheckClipboardBox() {
+		return chckbxCheckClipboard;
+	}
+	
+	public JCheckBox getFunctioninfo() {
+		return chckbxAdditionalFunctionInfo;
+	}
+	
+	public JFormattedTextField getRecentFilesSize() {
+		return textField;
 	}
 }

@@ -5,11 +5,11 @@ import java.awt.event.ActionListener;
 
 import it.taglio.gui.UDNGui;
 
-public class UndecorListener implements ActionListener {
+public class UndecorAdapter implements ActionListener {
 	
 	private final UDNGui frame;
 	
-	public UndecorListener(UDNGui frame) {
+	public UndecorAdapter(UDNGui frame) {
 		this.frame = frame;
 	}
 	

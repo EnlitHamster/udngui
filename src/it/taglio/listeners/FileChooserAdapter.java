@@ -10,11 +10,11 @@ import javax.swing.JFileChooser;
 
 import it.taglio.gui.UDNGui;
 
-public class FileChooserListener implements PropertyChangeListener, ActionListener {
+public class FileChooserAdapter implements PropertyChangeListener, ActionListener {
 
 	private final UDNGui frame;
 
-	public FileChooserListener(UDNGui frame) {
+	public FileChooserAdapter(UDNGui frame) {
 		this.frame = frame;
 	}
 

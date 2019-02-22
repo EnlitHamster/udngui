@@ -6,11 +6,11 @@ import javax.swing.event.TreeSelectionListener;
 import it.taglio.gui.UDNGui;
 import it.taglio.types.FuncInfo;
 
-public class TreeListener implements TreeSelectionListener {
+public class TreeAdapter implements TreeSelectionListener {
 
 	private final UDNGui frame;
 
-	public TreeListener(UDNGui frame) {
+	public TreeAdapter(UDNGui frame) {
 		this.frame = frame;
 	}
 

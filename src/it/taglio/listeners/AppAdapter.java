@@ -18,32 +18,20 @@ import javax.swing.JOptionPane;
 import it.taglio.Main;
 import it.taglio.gui.UDNGui;
 
-public class AppListner implements DropTargetListener, WindowListener {
+public class AppAdapter implements DropTargetListener, WindowListener, OptionsUpdateListener {
 
 	private final UDNGui frame;
 
-	public AppListner(UDNGui frame) {
+	public AppAdapter(UDNGui frame) {
 		this.frame = frame;
-	}
-
-	@Override
-	public void dragEnter(DropTargetDragEvent drag) {
-	}
-
-	@Override
-	public void dragExit(DropTargetEvent event) {
-	}
-
-	@Override
-	public void dragOver(DropTargetDragEvent drag) {
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void drop(DropTargetDropEvent drop) {
+	public void drop(DropTargetDropEvent event) {
 		try {
-			drop.acceptDrop(DnDConstants.ACTION_COPY);
-			List<File> files = (List<File>) drop.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+			event.acceptDrop(DnDConstants.ACTION_COPY);
+			List<File> files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
 
 			int i = 0;
 			while (i < files.size() && !files.get(i).getName().substring(files.get(i).getName().lastIndexOf('.'))
@@ -60,6 +48,18 @@ public class AppListner implements DropTargetListener, WindowListener {
 	}
 
 	@Override
+	public void windowClosing(WindowEvent event) {
+		if ( event.getID() == WindowEvent.WINDOW_CLOSING)
+			Main.saveRecent();
+	}
+
+	@Override
+	public void updateOptions(OptionsUpdateEvent event) {
+		
+	}
+
+
+	@Override
 	public void dropActionChanged(DropTargetDragEvent drag) {
 	}
 
@@ -69,12 +69,6 @@ public class AppListner implements DropTargetListener, WindowListener {
 
 	@Override
 	public void windowClosed(WindowEvent arg0) {
-	}
-
-	@Override
-	public void windowClosing(WindowEvent event) {
-		if ( event.getID() == WindowEvent.WINDOW_CLOSING)
-			Main.saveRecent();
 	}
 
 	@Override
@@ -93,4 +87,15 @@ public class AppListner implements DropTargetListener, WindowListener {
 	public void windowOpened(WindowEvent arg0) {
 	}
 
+	@Override
+	public void dragEnter(DropTargetDragEvent drag) {
+	}
+
+	@Override
+	public void dragExit(DropTargetEvent event) {
+	}
+
+	@Override
+	public void dragOver(DropTargetDragEvent drag) {
+	}
 }
