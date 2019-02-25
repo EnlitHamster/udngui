@@ -6,13 +6,11 @@ import static it.taglio.Constants.index;
 import static it.taglio.Constants.tutorial_0;
 import static it.taglio.Constants.tutorial_1;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.Locale;
 
 import javax.swing.JComponent;
@@ -72,28 +70,34 @@ public class AboutGui extends UDNDialog {
 		gridBagLayout.rowHeights = new int[] { 318, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
-		
-		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{527, 0};
-		gbl_panel.rowHeights = new int[]{20, 0};
-		gbl_panel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{1.0, Double.MIN_VALUE};
+
+		GridBagConstraints gbc_splitPane = new GridBagConstraints();
+		gbc_splitPane.fill = GridBagConstraints.BOTH;
+		gbc_splitPane.gridx = 0;
+		gbc_splitPane.gridy = 0;
 
 		// ---------------------
 		// Content instantiation
 		// ---------------------
 
 		splitPane = new JSplitPane();
-		tree = new JTree();		
+		tree = new JTree();
 		panel = new JPanel();
-		
-		// ----------------
-		// Containers setup
-		// ----------------
-		
-		panel.setLayout(gbl_panel);
+		webpage = new JEditorPane();
+
+		// -----------------
+		// Constraints setup
+		// -----------------
+
+		panel.setLayout(new BorderLayout(0, 0));
 		splitPane.setLeftComponent(tree);
 		splitPane.setRightComponent(panel);
+
+		// -------------
+		// Webpage setup
+		// -------------
+
+		webpage.setEditable(false);
 
 		// ----------
 		// Tree setup
@@ -110,20 +114,6 @@ public class AboutGui extends UDNDialog {
 		((DefaultTreeModel) tree.getModel()).nodeChanged(rootNode);
 		tree.setCellRenderer(new AboutTreeRenderer());
 
-		// -----------------
-		// Constraints setup
-		// -----------------
-
-		GridBagConstraints gbc_splitPane = new GridBagConstraints();
-		gbc_splitPane.fill = GridBagConstraints.BOTH;
-		gbc_splitPane.gridx = 0;
-		gbc_splitPane.gridy = 0;
-
-		GridBagConstraints gbc_webpage = new GridBagConstraints();
-		gbc_webpage.fill = GridBagConstraints.BOTH;
-		gbc_webpage.gridx = 0;
-		gbc_webpage.gridy = 0;
-
 		// --------------------
 		// Listeners & Handlers
 		// --------------------
@@ -132,20 +122,13 @@ public class AboutGui extends UDNDialog {
 
 		tree.addTreeSelectionListener(lTree);
 
-		// -------------------------
-		// Building frame content...
-		// -------------------------
-		
-		panel.add(webpage, gbc_webpage);
+		// --------------------
+		// Listeners & Handlers
+		// --------------------
+
+		panel.add(webpage, BorderLayout.CENTER);
 		getContentPane().setLayout(gridBagLayout);
 		getContentPane().add(splitPane, gbc_splitPane);
-		webpage = new JEditorPane();
-		
-		// -------------
-		// Webpage setup
-		// -------------
-		
-		webpage.setEditable(false);
 
 		setVisible(true);
 	}
@@ -164,25 +147,12 @@ public class AboutGui extends UDNDialog {
 	}
 
 	public void setPage(File page) {
-		System.out.println("Loading: " + page.getAbsolutePath());
-		BufferedReader reader = null;
-
 		try {
-			reader = new BufferedReader(new FileReader(page));
-
-			String text = "", line = null;
-			while ((line = reader.readLine()) != null)
-				text = text.concat(line);
-
-			webpage.setText(text);
+			webpage.setPage(page.toURI().toURL());
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Unable to load the information page", "Error",
 					JOptionPane.ERROR_MESSAGE);
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-			}
+			e.printStackTrace();
 		}
 	}
 }
