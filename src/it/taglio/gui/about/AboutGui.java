@@ -1,6 +1,6 @@
 package it.taglio.gui.about;
 
-import static it.taglio.Constants.about;
+import static it.taglio.Constants.*;
 import static it.taglio.Constants.about_me;
 import static it.taglio.Constants.index;
 import static it.taglio.Constants.tutorial_0;
@@ -90,11 +90,11 @@ public class AboutGui extends UDNDialog {
 		// Tree setup
 		// ----------
 
-		AboutCategory root = new AboutCategory("General Informations", index,
+		AboutCategory root = new AboutCategory("General Informations", doc_files[index],
 				new AboutEntry[] {
-						new AboutCategory("Tutorials", tutorial_0,
-								new AboutEntry[] { new AboutEntry("Clipboard features", tutorial_1) }),
-						new AboutEntry("Developper", about_me) });
+						new AboutCategory("Tutorials", doc_files[tutorial_0],
+								new AboutEntry[] { new AboutEntry("Clipboard features", doc_files[tutorial_1]) }),
+						new AboutEntry("Developper", doc_files[about_me]) });
 		DefaultMutableTreeNode rootNode = createTree(root);
 
 		((DefaultTreeModel) tree.getModel()).setRoot(rootNode);

@@ -3,10 +3,12 @@ package it.taglio;
 import static it.taglio.Constants.cache;
 import static it.taglio.Constants.dep_dir;
 import static it.taglio.Constants.deps;
+import static it.taglio.Constants.doc_dir;
 import static it.taglio.Constants.max_recent_size;
 import static it.taglio.Constants.root;
+import static it.taglio.Constants.root_online_dir;
 import static it.taglio.Constants.root_path;
-import static it.taglio.Constants.to_download;
+import static it.taglio.Constants.doc_files;
 import static it.taglio.Constants.v;
 import static it.taglio.Constants.version;
 
@@ -15,10 +17,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -71,6 +75,9 @@ public class Main {
 				}
 			}
 		}
+		
+		if (!(new File(doc_dir)).exists())
+			downloadDocs();
 
 		recent = loadRecent();
 		new UDNGui();
@@ -249,12 +256,23 @@ public class Main {
 	}
 
 	private static void downloadDocs() {
+		FileOutputStream stream = null;
+		
 		try {
-			for (String file : to_download) {
-				URL ws = new URL(file);
+			for (String file : doc_files) {
+				URL ws = new URL(root_online_dir + file);
+				ReadableByteChannel rbc = Channels.newChannel(ws.openStream());
+				stream = new FileOutputStream(doc_dir + file);
+				stream.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 			}			
-		} catch (MalformedURLException e) {
-			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

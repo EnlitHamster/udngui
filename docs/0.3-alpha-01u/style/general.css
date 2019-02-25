@@ -1,0 +1,17 @@
+@import url('fonts.css');
+
+h1, h2, h3, p, div {
+	font-family: 'gnuolane';
+}
+
+body {
+	margin: 5px;
+}
+
+h3 {
+	padding-left: 10px;
+}
+
+p, div {
+	padding-left: 20px;
+}
