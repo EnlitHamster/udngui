@@ -8,7 +8,8 @@ import javax.swing.JMenuItem;
 
 public class GuiMenuItem<T extends UDNDialog> extends JMenuItem implements ActionListener {
 	
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -2137412139005259811L;
+	
 	private final UDNGui frame;
 	private final Class<T> obj;
 	

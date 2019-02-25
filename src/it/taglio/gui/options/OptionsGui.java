@@ -24,9 +24,9 @@ import it.taglio.gui.UDNGui;
 import it.taglio.listeners.OptionsAdapter;
 
 public class OptionsGui extends UDNDialog {
-	
-	private static final long serialVersionUID = 1L;
 
+	private static final long serialVersionUID = 4138282380313989514L;
+	
 	// Cache
 	private JPanel panelCache;
 	private JLabel lblNumberOfCached;

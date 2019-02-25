@@ -29,7 +29,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -43,6 +42,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
 import it.taglio.Main;
+import it.taglio.gui.about.AboutGui;
 import it.taglio.gui.options.OptionsGui;
 import it.taglio.listeners.AppAdapter;
 import it.taglio.listeners.ExtendedEventMulticaster;
@@ -56,7 +56,7 @@ import it.taglio.types.FuncInfo;
 
 public class UDNGui extends JFrame {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -7490495827144499444L;
 
 	transient OptionsUpdateListener optionsUpdateListener;
 
@@ -74,7 +74,7 @@ public class UDNGui extends JFrame {
 	private JMenu mnRecentlyOpened;
 	private JMenu mnOther;
 	private GuiMenuItem<OptionsGui> mntmOptions;
-	private JMenuItem mntmAbout;
+	private GuiMenuItem<AboutGui> mntmAbout;
 
 	public UDNGui() {
 
@@ -91,8 +91,9 @@ public class UDNGui extends JFrame {
 		// -----------
 
 		// TODO: CREDIT THE GRAPHICS AUTHOR IN THE ABOUT TAB!
-		// - Icons: App icon made by Situ Herrera @
-		// https://www.flaticon.com/authors/situ-herrera
+		// - Situ Herrera @ https://www.flaticon.com/authors/situ-herrera
+		// - Freepik @ https://www.flaticon.com/authors/freepik
+		// - SmashIcons @ https://www.flaticon.com/authors/smashicons
 
 		setTitle("UnDName GUI");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -119,7 +120,7 @@ public class UDNGui extends JFrame {
 		mnRecentlyOpened = new JMenu("Recently opened");
 		mnOther = new JMenu("Other");
 		mntmOptions = new GuiMenuItem<OptionsGui>("Options", this, OptionsGui.class);
-		mntmAbout = new JMenuItem("About");
+		mntmAbout = new GuiMenuItem<AboutGui>("About", this, AboutGui.class);
 
 		splitPane = new JSplitPane();
 		fileChooser = new JFileChooser();
@@ -165,7 +166,7 @@ public class UDNGui extends JFrame {
 
 		((DefaultTreeModel) tree.getModel()).setRoot(null);
 		((DefaultTreeModel) tree.getModel()).nodeChanged(null);
-		tree.setCellRenderer(new DepTreeRenderer());
+		tree.setCellRenderer(new DLLTreeRenderer());
 
 		// -------------------
 		// Text initialization

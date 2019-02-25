@@ -1,6 +1,6 @@
 package it.taglio.gui;
 
-import static it.taglio.Constants.entry;
+import static it.taglio.Constants.f_entry;
 import static it.taglio.Constants.info;
 import static it.taglio.Constants.top;
 import static it.taglio.Constants.unknown;
@@ -17,8 +17,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import it.taglio.types.FuncEntry;
 import it.taglio.types.FuncInfo;
 
-@SuppressWarnings("serial")
-public class DepTreeRenderer extends DefaultTreeCellRenderer {
+public class DLLTreeRenderer extends DefaultTreeCellRenderer {
+
+	private static final long serialVersionUID = 6468283312082154147L;
 
 	@Override
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf,
@@ -35,7 +36,7 @@ public class DepTreeRenderer extends DefaultTreeCellRenderer {
 					.getImage(getClass().getResource(fInfo.name.equalsIgnoreCase("Unknown") ? unknown : info));
 			setIcon(new ImageIcon(icon.getScaledInstance(16, 16, Image.SCALE_DEFAULT)));
 		} else if (node.getUserObject() instanceof FuncEntry) {
-			Image icon = Toolkit.getDefaultToolkit().getImage(getClass().getResource(entry));
+			Image icon = Toolkit.getDefaultToolkit().getImage(getClass().getResource(f_entry));
 			setIcon(new ImageIcon(icon.getScaledInstance(16, 15, Image.SCALE_DEFAULT)));
 		}
 
