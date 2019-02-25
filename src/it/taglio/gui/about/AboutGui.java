@@ -16,8 +16,9 @@ import java.io.IOException;
 import java.util.Locale;
 
 import javax.swing.JComponent;
-import javax.swing.JLabel;
+import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
@@ -36,7 +37,8 @@ public class AboutGui extends UDNDialog {
 
 	private JSplitPane splitPane;
 	private JTree tree;
-	private JLabel label;
+	private JEditorPane webpage;
+	private JPanel panel;
 
 	public AboutGui(UDNGui frame) {
 		super(frame);
@@ -58,7 +60,7 @@ public class AboutGui extends UDNDialog {
 		setLocationRelativeTo(null);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource(about)));
 		setResizable(true);
-		setSize(450, 357);
+		setSize(620, 475);
 		setModalityType(ModalityType.APPLICATION_MODAL);
 
 		// ------------
@@ -70,21 +72,28 @@ public class AboutGui extends UDNDialog {
 		gridBagLayout.rowHeights = new int[] { 318, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
+		
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{527, 0};
+		gbl_panel.rowHeights = new int[]{20, 0};
+		gbl_panel.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{1.0, Double.MIN_VALUE};
 
 		// ---------------------
 		// Content instantiation
 		// ---------------------
 
 		splitPane = new JSplitPane();
-		tree = new JTree();
-		label = new JLabel("");
-
+		tree = new JTree();		
+		panel = new JPanel();
+		
 		// ----------------
 		// Containers setup
 		// ----------------
-
+		
+		panel.setLayout(gbl_panel);
 		splitPane.setLeftComponent(tree);
-		splitPane.setRightComponent(label);
+		splitPane.setRightComponent(panel);
 
 		// ----------
 		// Tree setup
@@ -110,6 +119,11 @@ public class AboutGui extends UDNDialog {
 		gbc_splitPane.gridx = 0;
 		gbc_splitPane.gridy = 0;
 
+		GridBagConstraints gbc_webpage = new GridBagConstraints();
+		gbc_webpage.fill = GridBagConstraints.BOTH;
+		gbc_webpage.gridx = 0;
+		gbc_webpage.gridy = 0;
+
 		// --------------------
 		// Listeners & Handlers
 		// --------------------
@@ -121,9 +135,17 @@ public class AboutGui extends UDNDialog {
 		// -------------------------
 		// Building frame content...
 		// -------------------------
-
+		
+		panel.add(webpage, gbc_webpage);
 		getContentPane().setLayout(gridBagLayout);
 		getContentPane().add(splitPane, gbc_splitPane);
+		webpage = new JEditorPane();
+		
+		// -------------
+		// Webpage setup
+		// -------------
+		
+		webpage.setEditable(false);
 
 		setVisible(true);
 	}
@@ -152,7 +174,7 @@ public class AboutGui extends UDNDialog {
 			while ((line = reader.readLine()) != null)
 				text = text.concat(line);
 
-			label.setText(text);
+			webpage.setText(text);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Unable to load the information page", "Error",
 					JOptionPane.ERROR_MESSAGE);
