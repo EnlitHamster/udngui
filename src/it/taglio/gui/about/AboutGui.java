@@ -1,6 +1,6 @@
 package it.taglio.gui.about;
 
-import static it.taglio.Constants.*;
+import static it.taglio.Constants.about;
 import static it.taglio.Constants.about_me;
 import static it.taglio.Constants.index;
 import static it.taglio.Constants.tutorial_0;
@@ -90,11 +90,11 @@ public class AboutGui extends UDNDialog {
 		// Tree setup
 		// ----------
 
-		AboutCategory root = new AboutCategory("General Informations", doc_files[index],
+		AboutCategory root = new AboutCategory("General Informations", index,
 				new AboutEntry[] {
-						new AboutCategory("Tutorials", doc_files[tutorial_0],
-								new AboutEntry[] { new AboutEntry("Clipboard features", doc_files[tutorial_1]) }),
-						new AboutEntry("Developper", doc_files[about_me]) });
+						new AboutCategory("Tutorials", tutorial_0,
+								new AboutEntry[] { new AboutEntry("Clipboard features", tutorial_1) }),
+						new AboutEntry("Developper", about_me) });
 		DefaultMutableTreeNode rootNode = createTree(root);
 
 		((DefaultTreeModel) tree.getModel()).setRoot(rootNode);
@@ -142,15 +142,16 @@ public class AboutGui extends UDNDialog {
 	}
 
 	public void setPage(File page) {
+		System.out.println("Loading: " + page.getAbsolutePath());
 		BufferedReader reader = null;
 
 		try {
 			reader = new BufferedReader(new FileReader(page));
-			
+
 			String text = "", line = null;
 			while ((line = reader.readLine()) != null)
 				text = text.concat(line);
-			
+
 			label.setText(text);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Unable to load the information page", "Error",

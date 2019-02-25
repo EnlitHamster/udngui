@@ -4,11 +4,12 @@ import static it.taglio.Constants.cache;
 import static it.taglio.Constants.dep_dir;
 import static it.taglio.Constants.deps;
 import static it.taglio.Constants.doc_dir;
+import static it.taglio.Constants.doc_dirs;
+import static it.taglio.Constants.doc_files;
 import static it.taglio.Constants.max_recent_size;
 import static it.taglio.Constants.root;
 import static it.taglio.Constants.root_online_dir;
 import static it.taglio.Constants.root_path;
-import static it.taglio.Constants.doc_files;
 import static it.taglio.Constants.v;
 import static it.taglio.Constants.version;
 
@@ -17,7 +18,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -75,9 +75,8 @@ public class Main {
 				}
 			}
 		}
-		
-		if (!(new File(doc_dir)).exists())
-			downloadDocs();
+
+		downloadDocs();
 
 		recent = loadRecent();
 		new UDNGui();
@@ -256,21 +255,33 @@ public class Main {
 	}
 
 	private static void downloadDocs() {
+		for (String file : doc_dirs)
+			if (!(new File(file)).exists())
+				(new File(file)).mkdirs();
+
 		FileOutputStream stream = null;
-		
+		FileWriter writer = null;
+
 		try {
 			for (String file : doc_files) {
-				URL ws = new URL(root_online_dir + file);
-				ReadableByteChannel rbc = Channels.newChannel(ws.openStream());
-				stream = new FileOutputStream(doc_dir + file);
-				stream.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-			}			
+				File tmp = null;
+				if (!(tmp = new File(doc_dir + file)).exists()) {
+					writer = new FileWriter(tmp);
+					writer.close();
+
+					URL ws = new URL(root_online_dir + file);
+					ReadableByteChannel rbc = Channels.newChannel(ws.openStream());
+					stream = new FileOutputStream(tmp);
+					stream.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			try {
-				stream.close();
-			} catch (IOException e) {
+				if (stream != null)
+					stream.close();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

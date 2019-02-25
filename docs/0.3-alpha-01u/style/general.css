@@ -1,4 +1,4 @@
-@import url('fonts.css');
+@import url('https://raw.githubusercontent.com/EnlitHamster/udngui/master/docs/0.3-alpha-01u/style/fonts.css');
 
 h1, h2, h3, p, div {
 	font-family: 'gnuolane';
