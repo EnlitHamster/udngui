@@ -3,7 +3,6 @@ package it.taglio.gui.about;
 import static it.taglio.Constants.about;
 import static it.taglio.Constants.about_me;
 import static it.taglio.Constants.index;
-import static it.taglio.Constants.stl_dir;
 import static it.taglio.Constants.tutorial_0;
 import static it.taglio.Constants.tutorial_1;
 
@@ -11,9 +10,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Locale;
 
 import javax.swing.JComponent;
@@ -142,17 +141,16 @@ public class AboutGui extends UDNDialog {
 		return root;
 	}
 
-	public void setPage(InputStream page) {
+	public void setPage(File page) {
 		BufferedReader reader = null;
 
 		try {
-			reader = new BufferedReader(new InputStreamReader(page));
+			reader = new BufferedReader(new FileReader(page));
+			
 			String text = "", line = null;
-			while ((line = reader.readLine()) != null) {
-				if (line.trim().startsWith("<!--importstyle:") && line.trim().endsWith("-->"))
-					text = text.concat(importStyle(line.trim().replace("<!--importstyle:", "").replace("-->", "")));
+			while ((line = reader.readLine()) != null)
 				text = text.concat(line);
-			}
+			
 			label.setText(text);
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "Unable to load the information page", "Error",
@@ -163,29 +161,5 @@ public class AboutGui extends UDNDialog {
 			} catch (IOException e) {
 			}
 		}
-	}
-
-	private String importStyle(String stylesheet) {
-		String style = "";
-		BufferedReader reader = null;
-
-		try {
-			style = "<style type=\"text/css\">";
-			reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(stl_dir + stylesheet)));
-			String line = null;
-			while ((line = reader.readLine()) != null)
-				style = style.concat(line);
-			style = style.concat("</style>");
-		} catch (Exception e) {
-			style = "";
-			JOptionPane.showMessageDialog(null, "Unable to load the stylesheet", "Error", JOptionPane.ERROR_MESSAGE);
-		} finally {
-			try {
-				reader.close();
-			} catch (IOException e) {
-			}
-		}
-
-		return style;
 	}
 }

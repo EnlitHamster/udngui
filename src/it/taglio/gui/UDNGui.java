@@ -81,7 +81,7 @@ public class UDNGui extends JFrame {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-				| UnsupportedLookAndFeelException e1) {
+				| UnsupportedLookAndFeelException e) {
 		}
 
 		JComponent.setDefaultLocale(Locale.ENGLISH);

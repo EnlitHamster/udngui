@@ -5,8 +5,10 @@ import static it.taglio.Constants.dep_dir;
 import static it.taglio.Constants.deps;
 import static it.taglio.Constants.max_recent_size;
 import static it.taglio.Constants.root;
-import static it.taglio.Constants.sep;
+import static it.taglio.Constants.root_path;
+import static it.taglio.Constants.to_download;
 import static it.taglio.Constants.v;
+import static it.taglio.Constants.version;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +17,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -27,8 +31,6 @@ import javax.swing.JOptionPane;
 import it.taglio.gui.UDNGui;
 
 public class Main {
-
-	private static final String version = "0.3-alpha-01u";
 
 	private static LinkedList<File> recent;
 
@@ -57,9 +59,9 @@ public class Main {
 		}
 
 		for (String dep : deps) {
-			if (!((new File(root.getPath() + sep + dep)).exists())) {
+			if (!((new File(root_path + dep)).exists())) {
 				try {
-					extract(root.getPath(), dep);
+					extract(root_path, dep);
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(null, "Couldn't extract " + dep + ".", "Error",
 							JOptionPane.ERROR_MESSAGE);
@@ -185,7 +187,7 @@ public class Main {
 
 			int bytes;
 			byte[] buffer = new byte[4096];
-			String file_path = path + sep + file;
+			String file_path = path + file;
 			output = new FileOutputStream(file_path);
 
 			while ((bytes = stream.read(buffer)) > 0)
@@ -244,6 +246,16 @@ public class Main {
 		}
 
 		return list;
+	}
+
+	private static void downloadDocs() {
+		try {
+			for (String file : to_download) {
+				URL ws = new URL(file);
+			}			
+		} catch (MalformedURLException e) {
+			
+		}
 	}
 
 }
