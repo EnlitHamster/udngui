@@ -6,7 +6,6 @@ import static it.taglio.Constants.index;
 import static it.taglio.Constants.tutorial_0;
 import static it.taglio.Constants.tutorial_1;
 
-import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Toolkit;
@@ -16,7 +15,7 @@ import java.util.Locale;
 import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.UIManager;
@@ -36,7 +35,7 @@ public class AboutGui extends UDNDialog {
 	private JSplitPane splitPane;
 	private JTree tree;
 	private JEditorPane webpage;
-	private JPanel panel;
+	private JScrollPane panel;
 
 	public AboutGui(UDNGui frame) {
 		super(frame);
@@ -71,25 +70,29 @@ public class AboutGui extends UDNDialog {
 		gridBagLayout.columnWeights = new double[] { 1.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
 
-		GridBagConstraints gbc_splitPane = new GridBagConstraints();
-		gbc_splitPane.fill = GridBagConstraints.BOTH;
-		gbc_splitPane.gridx = 0;
-		gbc_splitPane.gridy = 0;
-
 		// ---------------------
 		// Content instantiation
 		// ---------------------
 
 		splitPane = new JSplitPane();
 		tree = new JTree();
-		panel = new JPanel();
+		panel = new JScrollPane();
 		webpage = new JEditorPane();
 
 		// -----------------
 		// Constraints setup
 		// -----------------
 
-		panel.setLayout(new BorderLayout(0, 0));
+		GridBagConstraints gbc_splitPane = new GridBagConstraints();
+		gbc_splitPane.fill = GridBagConstraints.BOTH;
+		gbc_splitPane.gridx = 0;
+		gbc_splitPane.gridy = 0;
+		
+		// ---------------
+		// Containrs setup
+		// ---------------
+
+		panel.setViewportView(webpage);
 		splitPane.setLeftComponent(tree);
 		splitPane.setRightComponent(panel);
 
@@ -126,7 +129,6 @@ public class AboutGui extends UDNDialog {
 		// Listeners & Handlers
 		// --------------------
 
-		panel.add(webpage, BorderLayout.CENTER);
 		getContentPane().setLayout(gridBagLayout);
 		getContentPane().add(splitPane, gbc_splitPane);
 
