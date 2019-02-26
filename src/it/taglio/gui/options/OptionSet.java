@@ -68,14 +68,16 @@ public class OptionSet {
 
 			writer = new FileWriter(new File(config));
 			for (String key : opt_map.keySet()) {
-				System.out.println(encode(key, opt_map.get(key)));
 				writer.write(encode(key, opt_map.get(key)));
 			}
 
 			Runtime.getRuntime().exec("attrib -H " + config);
 
+			JOptionPane.showMessageDialog(null, "Options saved.", "Done", JOptionPane.INFORMATION_MESSAGE);
+
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		} finally {
 			try {
@@ -151,11 +153,9 @@ public class OptionSet {
 					if (i_val >= 0 && i_val <= max_recent_size)
 						opt_map.put(key, "" + value);
 					else {
-						JOptionPane
-								.showConfirmDialog(null,
-										"File cache size must be a number between 0 and " + max_recent_size
-												+ ".\nDo you want to change it?",
-										"Attention", JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(null,
+								"File cache size must be a number between 0 and " + max_recent_size, "Attention",
+								JOptionPane.WARNING_MESSAGE);
 					}
 				} else if (key.equalsIgnoreCase(AFI) || key.equalsIgnoreCase(CCS)) {
 					Boolean.parseBoolean(value);

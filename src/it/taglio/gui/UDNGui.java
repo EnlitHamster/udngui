@@ -60,6 +60,8 @@ public class UDNGui extends JFrame {
 
 	transient OptionsUpdateListener optionsUpdateListener;
 
+	boolean f_info, check_clip;
+
 	private JTextField textField;
 	private JLabel lblFunctionNameTo;
 	private JLabel lblUndecoratedFunctionName;
@@ -76,7 +78,10 @@ public class UDNGui extends JFrame {
 	private GuiMenuItem<OptionsGui> mntmOptions;
 	private GuiMenuItem<AboutGui> mntmAbout;
 
-	public UDNGui() {
+	public UDNGui(boolean b1, boolean b2) {
+
+		f_info = b1;
+		check_clip = b2;
 
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -177,17 +182,18 @@ public class UDNGui extends JFrame {
 
 		String clipboard = "";
 
-		try {
-			clipboard = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
-			File f = new File(Paths.get(clipboard).toString());
-			if (f.exists()) {
-				setDLL(f);
-				updateTree(f.getPath());
-			} else
-				throw new Exception();
-		} catch (Exception e) {
-			textField.setText(clipboard);
-		}
+		if (check_clip)
+			try {
+				clipboard = (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+				File f = new File(Paths.get(clipboard).toString());
+				if (f.exists()) {
+					setDLL(f);
+					updateTree(f.getPath());
+				} else
+					throw new Exception();
+			} catch (Exception e) {
+				textField.setText(clipboard);
+			}
 
 		// -----------------
 		// Constraints setup
@@ -248,6 +254,7 @@ public class UDNGui extends JFrame {
 		UndecorAdapter lBtn = new UndecorAdapter(this);
 
 		addWindowListener(lApp);
+		addOptionsUpdateListener(lApp);
 		fileChooser.addPropertyChangeListener(lChooser);
 		fileChooser.addActionListener(lChooser);
 		tree.addTreeSelectionListener(lTree);
@@ -295,7 +302,7 @@ public class UDNGui extends JFrame {
 		if (file != null) {
 			FuncInfo[] functions = listDLL(file);
 			top = new DefaultMutableTreeNode((new File(file).getName()));
-			createTree(top, functions);
+			createTree(top, functions, f_info);
 		}
 
 		DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
@@ -414,12 +421,14 @@ public class UDNGui extends JFrame {
 
 	}
 
-	private static void createTree(DefaultMutableTreeNode top, FuncInfo[] content) {
+	private static void createTree(DefaultMutableTreeNode top, FuncInfo[] content, boolean f_info) {
 		for (FuncInfo fInfo : content) {
 			DefaultMutableTreeNode node = new DefaultMutableTreeNode(fInfo);
-			node.add(new DefaultMutableTreeNode(new FuncEntry("Ordinal", fInfo.ordinal)));
-			node.add(new DefaultMutableTreeNode(new FuncEntry("Hint", fInfo.hint, (byte) 4)));
-			node.add(new DefaultMutableTreeNode(new FuncEntry("Entry point", fInfo.entry_point, (byte) 8)));
+			if (f_info) {
+				node.add(new DefaultMutableTreeNode(new FuncEntry("Ordinal", fInfo.ordinal)));
+				node.add(new DefaultMutableTreeNode(new FuncEntry("Hint", fInfo.hint, (byte) 4)));
+				node.add(new DefaultMutableTreeNode(new FuncEntry("Entry point", fInfo.entry_point, (byte) 8)));
+			}
 			top.add(node);
 		}
 	}
@@ -445,5 +454,12 @@ public class UDNGui extends JFrame {
 
 	public void fireOptionsUpdate(OptionsUpdateEvent event) {
 		optionsUpdateListener.updateOptions(event);
+	}
+	
+	public void updateOpts(boolean f_info, boolean check_clip) {
+		this.f_info = f_info;
+		this.check_clip = check_clip;
+		if (fileChooser.getSelectedFile() != null)
+			updateTree(fileChooser.getSelectedFile().getAbsolutePath());
 	}
 }

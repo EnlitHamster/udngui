@@ -55,7 +55,8 @@ public class AppAdapter implements DropTargetListener, WindowListener, OptionsUp
 
 	@Override
 	public void updateOptions(OptionsUpdateEvent event) {
-		
+		Main.setRecentlyUsedSize(event.getRecentlyUsedSize());
+		frame.updateOpts(event.getMoreFuncInfo(), event.getCheckClipboard());
 	}
 
 

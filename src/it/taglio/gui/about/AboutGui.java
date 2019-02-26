@@ -25,6 +25,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import it.taglio.gui.UDNDialog;
 import it.taglio.gui.UDNGui;
+import it.taglio.gui.about.listeners.TreeAdapter;
 import it.taglio.types.AboutCategory;
 import it.taglio.types.AboutEntry;
 

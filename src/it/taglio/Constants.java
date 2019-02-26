@@ -19,10 +19,8 @@ public class Constants {
 
 	public static final String root_online_dir = "https://raw.githubusercontent.com/EnlitHamster/udngui/master/docs/0.3-alpha-01u/";
 	public static final String[] doc_files = { "index.html", "about.html", "tutorials/index.html",
-			"tutorials/clipboard.html", "errors/404.html", "styles/general.css", "styles/fonts.css",
-			"styles/gnuolane.ttf" };
-	public static final String[] doc_dirs = { doc_dir, doc_dir + "tutorials/", doc_dir + "errors/",
-			doc_dir + "styles/" };
+			"tutorials/clipboard.html", "errors/404.html" };
+	public static final String[] doc_dirs = { doc_dir, doc_dir + "tutorials/", doc_dir + "errors/" };
 
 	public static final String index = doc_dir + doc_files[0];
 	public static final String about_me = doc_dir + doc_files[1];

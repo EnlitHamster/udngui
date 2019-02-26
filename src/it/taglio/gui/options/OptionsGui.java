@@ -21,7 +21,7 @@ import javax.swing.text.NumberFormatter;
 
 import it.taglio.gui.UDNDialog;
 import it.taglio.gui.UDNGui;
-import it.taglio.listeners.OptionsAdapter;
+import it.taglio.gui.options.listeners.OptionsAdapter;
 
 public class OptionsGui extends UDNDialog {
 
@@ -42,8 +42,9 @@ public class OptionsGui extends UDNDialog {
 	private JCheckBox chckbxAdditionalFunctionInfo;
 
 	// Save/Discard
-	private JButton btnCancel;
 	private JButton btnAccept;
+	private JButton btnAcceptClose;
+	private JButton btnCancel;
 	
 	private OptionSet opts;
 
@@ -78,7 +79,7 @@ public class OptionsGui extends UDNDialog {
 
 		NumberFormatter formatter = new NumberFormatter(NumberFormat.getInstance());
 		formatter.setValueClass(Integer.class);
-		formatter.setAllowsInvalid(false);
+		formatter.setAllowsInvalid(true);
 
 		// ---------------------
 		// Content instantiation
@@ -99,7 +100,8 @@ public class OptionsGui extends UDNDialog {
 		chckbxAdditionalFunctionInfo = new JCheckBox("Additional function info");
 		
 		// Controls
-		btnAccept = new JButton("Apply & close");
+		btnAccept = new JButton("Apply");
+		btnAcceptClose = new JButton("Apply & close");
 		btnCancel = new JButton("Cancel");
 
 		// -------------
@@ -122,8 +124,9 @@ public class OptionsGui extends UDNDialog {
 		panelCache.setBounds(10, 10, 424, 81);
 		panelGeneral.setBounds(10, 102, 207, 50);
 		panelDLL.setBounds(227, 102, 207, 50);
+		btnAccept.setBounds(114, 163, 100, 23);
+		btnAcceptClose.setBounds(224, 163, 100, 23);
 		btnCancel.setBounds(334, 163, 100, 23);
-		btnAccept.setBounds(224, 163, 100, 23);
 
 		// Cache panel
 		lblNumberOfCached.setBounds(10, 16, 109, 20);
@@ -156,7 +159,9 @@ public class OptionsGui extends UDNDialog {
 		OptionsAdapter lOpt = new OptionsAdapter(frame, this, opts);
 
 		btnAccept.addActionListener(lOpt);
+		btnAcceptClose.addActionListener(lOpt);
 		btnCancel.addActionListener(lOpt);
+		btnClearCache.addActionListener(lOpt);
 
 		// ------
 		// Params
@@ -183,15 +188,28 @@ public class OptionsGui extends UDNDialog {
 		getContentPane().add(panelCache);
 		getContentPane().add(panelGeneral);
 		getContentPane().add(panelDLL);
-		getContentPane().add(btnCancel);
 		getContentPane().add(btnAccept);
+		getContentPane().add(btnAcceptClose);
+		getContentPane().add(btnCancel);
 
 		// Initiate
 		setVisible(true);
 	}
-
+	
 	public JButton getAccept() {
 		return btnAccept;
+	}
+
+	public JButton getAcceptClose() {
+		return btnAcceptClose;
+	}
+
+	public JButton getCancel() {
+		return btnCancel;
+	}
+
+	public JButton getClearCache() {
+		return btnClearCache;
 	}
 	
 	public JCheckBox getCheckClipboardBox() {

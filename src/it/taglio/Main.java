@@ -33,9 +33,11 @@ import java.util.LinkedList;
 import javax.swing.JOptionPane;
 
 import it.taglio.gui.UDNGui;
+import it.taglio.gui.options.OptionSet;
 
 public class Main {
 
+	private static int recently_used_size = max_recent_size;
 	private static LinkedList<File> recent;
 
 	public static void main(String[] args) {
@@ -78,8 +80,17 @@ public class Main {
 
 		downloadDocs();
 
+		boolean add_finfo, check_clip;
+
+		{
+			OptionSet set = OptionSet.read();
+			recently_used_size = Math.max(0, Math.min(max_recent_size, Integer.parseInt(set.get(OptionSet.RUS))));
+			add_finfo = Boolean.parseBoolean(set.get(OptionSet.AFI));
+			check_clip = Boolean.parseBoolean(set.get(OptionSet.CCS));
+		}
+
 		recent = loadRecent();
-		new UDNGui();
+		new UDNGui(add_finfo, check_clip);
 	}
 
 	public static Iterator<File> getRecent() {
@@ -97,7 +108,7 @@ public class Main {
 				recent.remove(file);
 
 			recent.add(file);
-			if (recent.size() > max_recent_size)
+			if (recent.size() > recently_used_size)
 				recent.poll();
 		}
 	}
@@ -236,7 +247,7 @@ public class Main {
 
 			while ((line = reader.readLine()) != null) {
 				File file = new File(line);
-				if (file.exists())
+				if (file.exists() && list.size() < recently_used_size)
 					list.add(file);
 			}
 		} catch (Exception e) {
@@ -285,6 +296,36 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public static void setRecentlyUsedSize(int rus) {
+		if (rus >= 0 && rus <= max_recent_size)
+			recently_used_size = rus;
+
+		resizeRecent();
+	}
+
+	private static void resizeRecent() {
+		if (recent != null) {
+			LinkedList<File> newList = new LinkedList<File>();
+			for (int i = 0; i < recently_used_size && i < recent.size(); ++i)
+				if (recent.get(i) != null)
+					newList.add(recent.get(i));
+		}
+	}
+
+	public static void resetRecent() {
+		if (!(new File(cache)).exists())
+			return;
+
+		try {
+			Runtime.getRuntime().exec("attrib -H " + cache).waitFor();
+			Files.delete((new File(cache)).toPath());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		recent = loadRecent();
 	}
 
 }
